@@ -4,13 +4,15 @@ import './index.css';
 import Calculator from './Calculator';
 import CalculatorApi from './CalculatorAPi';
 import * as serviceWorker from './serviceWorker';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 ReactDOM.render(
     <Router>
         <div>
-            <Route exact path="/" component={Calculator} />
-            <Route path="*" component={CalculatorApi} />
+            <Switch>
+                <Route exact path="/" component={Calculator} />
+                <Route path="*" component={CalculatorApi} />
+            </Switch>
         </div>
     </Router>,
     document.getElementById('root')
