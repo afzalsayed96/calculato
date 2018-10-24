@@ -1,18 +1,12 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import Button from "@material-ui/core/Button";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
-import mexp from "math-expression-evaluator";
-
-const MULT = "×";
-const PLUS = "+";
-const DIV = "/";
-const MINUS = "-";
-const CE = "CE";
-const EQ = "=";
-const ERR = "ERR";
+import keys from "./constants/calc";
+import onCalcAction from "./actions/onCalcAction";
 
 const styles = theme => ({
   root: {
@@ -61,58 +55,23 @@ const RowInner = ({ children, classes }) => (
 
 const Row = withStyles(styles)(RowInner);
 
-const calculate = expr => {
-  try {
-    return mexp.eval(expr);
-  } catch (err) {
-    return ERR;
-  }
-};
-
 class Calculator extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      display: ""
-    };
-  }
-
   onNumPress = e => {
-    const input = e.currentTarget.value;
-    this.setState(state => ({
-      display:
-        state.display === ERR
-          ? `${parseInt(input)}`
-          : `${state.display}${parseInt(input)}`
-    }));
+    this.props.onCalcAction(e.currentTarget.value, true);
   };
 
   onOpPress = e => {
-    var input = e.currentTarget.value;
-    const op = {
-      [PLUS]: "+",
-      [MINUS]: "-",
-      [MULT]: "*",
-      [DIV]: "/"
-    };
-    switch (input) {
-      case CE:
-        this.setState(state => ({ display: "" }));
-        break;
-      case EQ:
-        this.setState(state => ({ display: calculate(state.display) }));
-        break;
-      default:
-        console.log(input);
-        this.setState(state => ({ display: `${state.display} ${op[input]} ` }));
-    }
+    this.props.onCalcAction(e.currentTarget.value, false);
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, title, calc } = this.props;
     return (
       <div className={classes.root}>
         <Grid container className={classes.root} spacing={16}>
+          <Row>
+            <h1>{title}</h1>
+          </Row>
           <Grid item xs={12}>
             <Grid
               container
@@ -121,7 +80,7 @@ class Calculator extends Component {
               spacing={24}
             >
               <Grid item>
-                <Paper className={classes.paper}>{this.state.display}</Paper>
+                <Paper className={classes.paper}>{calc.display}</Paper>
               </Grid>
             </Grid>
           </Grid>
@@ -129,25 +88,29 @@ class Calculator extends Component {
             <NumKey key={1} value={1} onPress={this.onNumPress} />
             <NumKey key={2} value={2} onPress={this.onNumPress} />
             <NumKey key={3} value={3} onPress={this.onNumPress} />
-            <OpKey key={MINUS} value={MINUS} onPress={this.onOpPress} />
+            <OpKey
+              key={keys.MINUS}
+              value={keys.MINUS}
+              onPress={this.onOpPress}
+            />
           </Row>
           <Row>
             <NumKey key={4} value={4} onPress={this.onNumPress} />
             <NumKey key={5} value={5} onPress={this.onNumPress} />
             <NumKey key={6} value={6} onPress={this.onNumPress} />
-            <OpKey key={PLUS} value={PLUS} onPress={this.onOpPress} />
+            <OpKey key={keys.PLUS} value={keys.PLUS} onPress={this.onOpPress} />
           </Row>
           <Row>
             <NumKey key={7} value={7} onPress={this.onNumPress} />
             <NumKey key={8} value={8} onPress={this.onNumPress} />
             <NumKey key={9} value={9} onPress={this.onNumPress} />
-            <OpKey key={MULT} value={MULT} onPress={this.onOpPress} />
+            <OpKey key={keys.MULT} value={keys.MULT} onPress={this.onOpPress} />
           </Row>
           <Row>
-            <OpKey key={CE} value={CE} onPress={this.onOpPress} />
+            <OpKey key={keys.CE} value={keys.CE} onPress={this.onOpPress} />
             <NumKey key={0} value={0} onPress={this.onNumPress} />
-            <OpKey key={EQ} value={EQ} onPress={this.onOpPress} />
-            <OpKey key={DIV} value={DIV} onPress={this.onOpPress} />
+            <OpKey key={keys.EQ} value={keys.EQ} onPress={this.onOpPress} />
+            <OpKey key={keys.DIV} value={keys.DIV} onPress={this.onOpPress} />
           </Row>
         </Grid>
       </div>
@@ -156,7 +119,22 @@ class Calculator extends Component {
 }
 
 Calculator.propTypes = {
-  classes: PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired,
+  title: PropTypes.string.isRequired,
+  calc: PropTypes.shape({
+    display: PropTypes.string.isRequired
+  }).isRequired,
+  onCalcAction: PropTypes.func.isRequired
 };
 
-export default withStyles(styles)(Calculator);
+const mapStateToProps = state => ({
+  title: state.app.title,
+  calc: state.calculator
+});
+
+const actions = { onCalcAction };
+
+export default connect(
+  mapStateToProps,
+  actions
+)(withStyles(styles)(Calculator));
