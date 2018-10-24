@@ -14,15 +14,26 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
+    "lint": "eslint . --ext=js,jsx;  exit 0",
+    "fix": "eslint src --ext=js,jsx --fix",
+    "q": "eslint --quiet --fix src/index.js $(git diff --cached --name-only --diff-filter=d HEAD | grep .js$)"
   },
   "browserslist": [
     ">0.2%",
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+    "optionalDependencies": {
+    "@babel/core": "7.0.0",
+    "@types/googlemaps": "3.30.13",
+    "@types/markerclustererplus": "2.1.33",
+    "ajv": "5.0.0",
+    "babel-eslint": "7.2.3",
+    "eslint": "4.19.1",
+    "eslint-config-prettier": "3.1.0",
+    "eslint-plugin-prettier": "2.6.2",
+    "eslint-plugin-react": "7.11.1",
+    "prettier": "1.14.3"
+  }
 }
