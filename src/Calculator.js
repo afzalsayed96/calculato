@@ -5,13 +5,15 @@ import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 
+const mexp = require('math-expression-evaluator')
+
 const styles = theme => ({
   root: {
     flexGrow: 1,
   },
   paper: {
     padding: theme.spacing.unit * 2,
-    textAlign: 'center',
+    textAlign: 'right',
     width: 300,
     height: 20,
     text: "hello",
@@ -56,8 +58,8 @@ class Calculator extends Component {
     else if (parseInt(input) == input) {
       if (this.state.operator === '') {
         this.setState((state) => ({
-          operand1: (state.operand1 == 1/0 || state.operand1 == (1/0)+1)?input:state.operand1 + input,
-          text: (state.operand1 == 1/0 || state.operand1 == (1/0)+1)?input:state.operand1 + input
+          operand1: (state.operand1 == 1 / 0 || state.operand1 == -(1 / 0)) ? input : state.operand1 + input,
+          text: (state.operand1 == 1 / 0 || state.operand1 == -(1 / 0)) ? input : state.operand1 + input
         }));
       }
       else {
@@ -67,7 +69,7 @@ class Calculator extends Component {
         }));
       }
     }
-    else if (this.state.operand2 === '' && this.state.operand1 !== '' && input!=='=') {
+    else if (this.state.operand2 === '' && this.state.operand1 !== '' && input !== '=') {
       this.setState((state) => ({
         operator: input.replace('×', '*'),
         text: (state.operator === '') ? state.text + input : state.text.toString().slice(0, -1) + input
@@ -75,9 +77,9 @@ class Calculator extends Component {
     }
     else if (input === '=' && this.state.operand2 !== '' && this.state.operand1 !== '') {
       this.setState((state) => ({
-        result: eval(parseInt(state.operand1) + state.operator + parseInt(state.operand2)),
-        text: eval(parseInt(state.operand1) + state.operator + parseInt(state.operand2)),
-        operand1: eval(parseInt(state.operand1) + state.operator + parseInt(state.operand2)),
+        result: mexp.eval(parseInt(state.operand1) + state.operator + parseInt(state.operand2)),
+        text: mexp.eval(parseInt(state.operand1) + state.operator + parseInt(state.operand2)),
+        operand1: mexp.eval(parseInt(state.operand1) + state.operator + parseInt(state.operand2)),
         operand2: '',
         operator: ''
       }));

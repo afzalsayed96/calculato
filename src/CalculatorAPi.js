@@ -1,26 +1,21 @@
 import React, { Component } from 'react';
 
-const CalculatorApi = () => {
+const mexp = require('math-expression-evaluator')
 
-    const op1 = window.location.href.split('/')[3];
-    const op2 = window.location.href.split('/')[4];
-    
+const CalculatorApi = (props) => {
+
+    const expr = props.location.pathname.slice(1);
     let result
-    try{
-        if (op2!=null){
-            result = escape(eval(op1+'/'+op2))
-        }
-        else{
-        result = escape(eval(op1))
-        }
+    try {
+        result = mexp.eval(expr)
     }
-    catch(err){
+    catch (err) {
         result = '???'
     }
-    return(
-        
+    return (
+
         <h1>
-            <big><strong>{(op1)+((op2!=null)?'/'+op2:'')} = {result}</strong></big>
+            <big><strong>{expr} = {result}</strong></big>
         </h1>
     )
 }
