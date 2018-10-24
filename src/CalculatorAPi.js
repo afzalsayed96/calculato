@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-
-const mexp = require('math-expression-evaluator')
+import mexp from 'math-expression-evaluator';
 
 const CalculatorApi = (props) => {
 

@@ -4,8 +4,15 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
+import mexp from 'math-expression-evaluator';
 
-const mexp = require('math-expression-evaluator')
+const MULT='×';
+const PLUS='+';
+const DIV='/';
+const MINUS='-';
+const CE='CE';
+const EQ='=';
+const ERR='ERR';
 
 const styles = theme => ({
   root: {
@@ -21,68 +28,73 @@ const styles = theme => ({
   },
 });
 
+const NumKeyInner = ({value, onPress}) => (
+  <Grid key={value} item>
+    <Button variant="contained" color="primary" onClick={onPress} value={value}>{value}</Button>
+  </Grid>
+);
+const NumKey = withStyles(styles)(NumKeyInner);
+
+
+const OpKeyInner = ({value, onPress}) => (
+  <Grid key={value} item>
+    <Button variant="contained" color="secondary" onClick={onPress} value={value}>{value}</Button>
+  </Grid>
+);
+const OpKey = withStyles(styles)(OpKeyInner);
+
+
+const RowInner = ({ children, classes }) => (
+  <Grid item xs={12}>
+    <Grid container className={classes.root} justify="center" spacing={24}>
+      {children}
+    </Grid>
+  </Grid>
+);
+
+const Row = withStyles(styles)(RowInner);
+
+const calculate = (expr) => {
+  try {
+    return mexp.eval(expr)
+  }
+  catch (err) {
+    return ERR;
+  }
+};
+
 class Calculator extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      text: '',
-      operand1: '',
-      operand2: '',
-      operator: '',
-      result: ''
+      display: '',
     }
   }
 
-  handleClick = (e) => {
+  onNumPress = e => {
+    const input = e.currentTarget.value;
+    this.setState((state) => ({ display: state.display === ERR ? `${parseInt(input)}` : `${state.display}${parseInt(input)}`
+    }));
+  }
+
+  onOpPress = (e) => {
     var input = e.currentTarget.value;
-    if (input === '⟵') {
-      if (this.state.operand2 !== '') {
-        this.setState((state) => ({
-          operand2: state.operand2.toString().slice(0, -1),
-          text: state.text.toString().slice(0, -1)
-        }));
-      }
-      else if (this.state.operator !== '') {
-        this.setState((state) => ({
-          operator: '',
-          text: state.text.toString().slice(0, -1)
-        }));
-      }
-      else if (this.state.operand1 !== '') {
-        this.setState((state) => ({
-          operand1: state.operand1.toString().slice(0, -1),
-          text: state.text.toString().slice(0, -1)
-        }));
-      }
-    }
-    else if (parseInt(input) == input) {
-      if (this.state.operator === '') {
-        this.setState((state) => ({
-          operand1: (state.operand1 == 1 / 0 || state.operand1 == -(1 / 0)) ? input : state.operand1 + input,
-          text: (state.operand1 == 1 / 0 || state.operand1 == -(1 / 0)) ? input : state.operand1 + input
-        }));
-      }
-      else {
-        this.setState((state) => ({
-          operand2: state.operand2 + input,
-          text: state.text + input
-        }));
-      }
-    }
-    else if (this.state.operand2 === '' && this.state.operand1 !== '' && input !== '=') {
-      this.setState((state) => ({
-        operator: input.replace('×', '*'),
-        text: (state.operator === '') ? state.text + input : state.text.toString().slice(0, -1) + input
-      }));
-    }
-    else if (input === '=' && this.state.operand2 !== '' && this.state.operand1 !== '') {
-      this.setState((state) => ({
-        result: mexp.eval(parseInt(state.operand1) + state.operator + parseInt(state.operand2)),
-        text: mexp.eval(parseInt(state.operand1) + state.operator + parseInt(state.operand2)),
-        operand1: mexp.eval(parseInt(state.operand1) + state.operator + parseInt(state.operand2)),
-        operand2: '',
-        operator: ''
-      }));
+    const op = {
+      [PLUS]: '+',
+      [MINUS]: '-',
+      [MULT]: '*',
+      [DIV]:  '/',
+    };
+    switch(input) {
+      case CE:
+        this.setState((state) => ({ display: ''}));
+        break;
+      case EQ:
+        this.setState((state) => ({ display: calculate(state.display)}));
+        break;
+      default:
+        console.log(input);
+        this.setState((state) => ({ display: `${state.display} ${op[input]} `})); 
     }
   }
 
@@ -96,47 +108,35 @@ class Calculator extends Component {
             <Grid container className={classes.root} justify="center" spacing={24}>
 
               <Grid item>
-                <Paper className={classes.paper} >{this.state.text}</Paper>
+                <Paper className={classes.paper} >{this.state.display}</Paper>
               </Grid>
 
             </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <Grid container className={classes.root} justify="center" spacing={24}>
-              {[1, 2, 3, '-'].map(value => (
-                <Grid key={value} item>
-                  <Button variant="contained" color="primary" onClick={this.handleClick} value={value}>{value}</Button>
-                </Grid>
-              ))}
-            </Grid>
-          </Grid>
-          <Grid item xs={12}>
-            <Grid container className={classes.root} justify="center" spacing={24}>
-              {[4, 5, 6, '+'].map(value => (
-                <Grid key={value} item>
-                  <Button variant="contained" color="primary" onClick={this.handleClick} value={value}>{value}</Button>
-                </Grid>
-              ))}
-            </Grid>
-          </Grid>
-          <Grid item xs={12}>
-            <Grid container className={classes.root} justify="center" spacing={24}>
-              {[7, 8, 9, '×'].map(value => (
-                <Grid key={value} item>
-                  <Button variant="contained" color="primary" onClick={this.handleClick} value={value}>{value}</Button>
-                </Grid>
-              ))}
-            </Grid>
-          </Grid>
-          <Grid item xs={12}>
-            <Grid container className={classes.root} justify="center" spacing={24}>
-              {['⟵', 0, '=', '/'].map(value => (
-                <Grid key={value} item>
-                  <Button variant="contained" color="primary" onClick={this.handleClick} value={value}>{value}</Button>
-                </Grid>
-              ))}
-            </Grid>
-          </Grid>
+          <Row>
+            <NumKey key={1} value={1} onPress={this.onNumPress} />
+            <NumKey key={2} value={2} onPress={this.onNumPress} />
+            <NumKey key={3} value={3} onPress={this.onNumPress} />
+            <OpKey key={MINUS} value={MINUS} onPress={this.onOpPress} />
+          </Row>
+          <Row>
+            <NumKey key={4} value={4} onPress={this.onNumPress} />
+            <NumKey key={5} value={5} onPress={this.onNumPress} />
+            <NumKey key={6} value={6} onPress={this.onNumPress} />
+            <OpKey key={PLUS} value={PLUS} onPress={this.onOpPress} />
+          </Row>
+          <Row>
+            <NumKey key={7} value={7} onPress={this.onNumPress} />
+            <NumKey key={8} value={8} onPress={this.onNumPress} />
+            <NumKey key={9} value={9} onPress={this.onNumPress} />
+            <OpKey key={MULT} value={MULT} onPress={this.onOpPress} />
+          </Row>
+          <Row>
+            <OpKey key={CE} value={CE} onPress={this.onOpPress} />
+            <NumKey key={0} value={0} onPress={this.onNumPress} />
+            <OpKey key={EQ} value={EQ} onPress={this.onOpPress} />
+            <OpKey key={DIV} value={DIV} onPress={this.onOpPress} />
+          </Row>
         </Grid>
       </div>
     );
