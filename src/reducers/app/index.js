@@ -1,7 +1,7 @@
 import types from '../../action_types';
 
 export const initialState = {
-  title: 'Calculator Demo',
+  title: 'Calculato',
 };
 
 export default function(state = initialState, action) {
